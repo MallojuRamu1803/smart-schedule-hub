@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import Departments from "./pages/Departments";
 import Faculty from "./pages/Faculty";
 import FacultyMapping from "./pages/FacultyMapping";
+import FacultyAvailability from "./pages/FacultyAvailability";
 import Subjects from "./pages/Subjects";
 import Rooms from "./pages/Rooms";
 import TimeSlots from "./pages/TimeSlots";
@@ -51,6 +52,7 @@ const AppRoutes = () => {
       <Route path="/departments" element={<ProtectedRoute adminOnly><Departments /></ProtectedRoute>} />
       <Route path="/faculty" element={<ProtectedRoute adminOnly><Faculty /></ProtectedRoute>} />
       <Route path="/faculty-mapping" element={<ProtectedRoute adminOnly><FacultyMapping /></ProtectedRoute>} />
+      <Route path="/faculty-availability" element={<ProtectedRoute adminOnly><FacultyAvailability /></ProtectedRoute>} />
       <Route path="/subjects" element={<ProtectedRoute adminOnly><Subjects /></ProtectedRoute>} />
       <Route path="/rooms" element={<ProtectedRoute adminOnly><Rooms /></ProtectedRoute>} />
       <Route path="/time-slots" element={<ProtectedRoute adminOnly><TimeSlots /></ProtectedRoute>} />
