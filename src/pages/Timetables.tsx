@@ -36,6 +36,7 @@ import {
   Users,
   BookOpen,
   FlaskConical,
+  FileDown,
 } from 'lucide-react';
 import type {
   AcademicYear,
@@ -50,6 +51,7 @@ import type {
   FacultySubject,
 } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { exportTimetableToPDF } from '@/lib/pdfExport';
 
 const Timetables = () => {
   const { isAdmin } = useAuth();
@@ -481,8 +483,42 @@ const Timetables = () => {
                 ← Back to List
               </Button>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm">
-                  <Download className="w-4 h-4 mr-2" />
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => {
+                    if (!selectedSection && viewType === 'section') {
+                      toast.error('Please select a section first');
+                      return;
+                    }
+                    if (!selectedFaculty && viewType === 'faculty') {
+                      toast.error('Please select a faculty member first');
+                      return;
+                    }
+                    
+                    const filteredEntries = viewType === 'section'
+                      ? entries.filter(e => e.section_id === selectedSection)
+                      : entries.filter(e => e.faculty_id === selectedFaculty);
+                    
+                    const viewName = viewType === 'section'
+                      ? sections.find((s: any) => s.id === selectedSection)?.name || 'Section'
+                      : allFaculty.find(f => f.id === selectedFaculty)?.name || 'Faculty';
+                    
+                    exportTimetableToPDF(
+                      filteredEntries,
+                      workingDays,
+                      timeSlots,
+                      {
+                        title: selectedTimetable.name,
+                        subtitle: `Academic Year: ${(selectedTimetable as any).academic_year?.year || ''}`,
+                        viewType: viewType,
+                        viewName: viewName,
+                      }
+                    );
+                    toast.success('PDF exported successfully');
+                  }}
+                >
+                  <FileDown className="w-4 h-4 mr-2" />
                   Export PDF
                 </Button>
               </div>

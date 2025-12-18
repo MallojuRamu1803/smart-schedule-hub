@@ -15,7 +15,8 @@ import {
   Menu,
   X,
   GraduationCap,
-  ChevronRight
+  ChevronRight,
+  UserCheck
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -31,6 +32,7 @@ const navItems: NavItem[] = [
   { icon: Building2, label: 'Departments', href: '/departments', adminOnly: true },
   { icon: BookOpen, label: 'Subjects', href: '/subjects', adminOnly: true },
   { icon: Users, label: 'Faculty', href: '/faculty', adminOnly: true },
+  { icon: UserCheck, label: 'Faculty Mapping', href: '/faculty-mapping', adminOnly: true },
   { icon: DoorOpen, label: 'Rooms', href: '/rooms', adminOnly: true },
   { icon: Clock, label: 'Time Slots', href: '/time-slots', adminOnly: true },
   { icon: Calendar, label: 'Timetables', href: '/timetables' },

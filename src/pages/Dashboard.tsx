@@ -14,7 +14,8 @@ import {
   ArrowRight,
   TrendingUp,
   Clock,
-  CheckCircle2
+  CheckCircle2,
+  UserCheck
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -24,6 +25,7 @@ interface Stats {
   faculty: number;
   rooms: number;
   timetables: number;
+  mappings: number;
 }
 
 const Dashboard = () => {
@@ -34,17 +36,19 @@ const Dashboard = () => {
     faculty: 0,
     rooms: 0,
     timetables: 0,
+    mappings: 0,
   });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchStats = async () => {
-      const [departments, subjects, faculty, rooms, timetables] = await Promise.all([
+      const [departments, subjects, faculty, rooms, timetables, mappings] = await Promise.all([
         supabase.from('departments').select('id', { count: 'exact', head: true }),
         supabase.from('subjects').select('id', { count: 'exact', head: true }),
         supabase.from('faculty').select('id', { count: 'exact', head: true }),
         supabase.from('classrooms').select('id', { count: 'exact', head: true }),
         supabase.from('timetables').select('id', { count: 'exact', head: true }),
+        supabase.from('faculty_subjects').select('id', { count: 'exact', head: true }),
       ]);
 
       setStats({
@@ -53,6 +57,7 @@ const Dashboard = () => {
         faculty: faculty.count || 0,
         rooms: rooms.count || 0,
         timetables: timetables.count || 0,
+        mappings: mappings.count || 0,
       });
       setLoading(false);
     };
@@ -167,6 +172,7 @@ const Dashboard = () => {
                     { label: 'Add Faculty Members', done: stats.faculty > 0, href: '/faculty' },
                     { label: 'Add Subjects', done: stats.subjects > 0, href: '/subjects' },
                     { label: 'Add Rooms & Labs', done: stats.rooms > 0, href: '/rooms' },
+                    { label: 'Map Faculty to Subjects', done: stats.mappings > 0, href: '/faculty-mapping' },
                   ].map((step, index) => (
                     <Link
                       key={step.label}
