@@ -150,20 +150,29 @@ const Timetables = () => {
     }
 
     try {
-      // Fetch all required data for generation
-      const [subjectsRes, facultySubjectsRes, roomsRes, sectionsRes] = await Promise.all([
+      // Fetch all required data for generation including faculty availability
+      const [subjectsRes, facultySubjectsRes, roomsRes, sectionsRes, availabilityRes] = await Promise.all([
         supabase.from('subjects').select('*, section:sections(*, department:departments(*))'),
         supabase.from('faculty_subjects').select('*, faculty:faculty(*), subject:subjects(*)'),
         supabase.from('classrooms').select('*'),
         supabase.from('sections').select('*').eq('academic_year_id', formData.academic_year_id),
+        supabase.from('faculty_availability').select('*').eq('is_available', false),
       ]);
 
       const subjects = subjectsRes.data || [];
       const facultySubjects = facultySubjectsRes.data || [];
       const rooms = roomsRes.data || [];
       const activeSections = sectionsRes.data || [];
+      const facultyUnavailability = availabilityRes.data || [];
       const activeDays = workingDays.filter(d => d.is_active);
       const classSlots = timeSlots.filter(s => !s.is_break);
+
+      // Helper to check if faculty is available at a given day/slot
+      const isFacultyAvailable = (facultyId: string, dayId: string, slotId: string) => {
+        return !facultyUnavailability.some(
+          ua => ua.faculty_id === facultyId && ua.working_day_id === dayId && ua.time_slot_id === slotId
+        );
+      };
 
       // Simple constraint-based scheduling algorithm
       const generatedEntries: Omit<TimetableEntry, 'id' | 'created_at'>[] = [];
@@ -198,7 +207,10 @@ const Timetables = () => {
 
               const slotUsage = usedSlots.get(slotKey)!;
               
-              // Check if faculty is free
+              // Check if faculty is available (not marked unavailable)
+              if (!isFacultyAvailable(facultyMapping.faculty_id, day.id, slot.id)) continue;
+              
+              // Check if faculty is free (not already scheduled)
               if (slotUsage.has(`faculty_${facultyMapping.faculty_id}`)) continue;
               
               // Check if section already has a class
@@ -222,6 +234,9 @@ const Timetables = () => {
                   usedSlots.set(nextSlotKey, new Set());
                 }
                 const nextSlotUsage = usedSlots.get(nextSlotKey)!;
+                
+                // Check faculty availability for next slot too
+                if (!isFacultyAvailable(facultyMapping.faculty_id, day.id, nextSlot.id)) continue;
                 
                 if (nextSlotUsage.has(`faculty_${facultyMapping.faculty_id}`)) continue;
                 if (nextSlotUsage.has(`section_${section.id}`)) continue;
@@ -395,6 +410,7 @@ const Timetables = () => {
                   <div className="bg-secondary/50 rounded-lg p-4 text-sm text-muted-foreground">
                     <p className="font-medium text-foreground mb-2">Generation will:</p>
                     <ul className="list-disc list-inside space-y-1">
+                      <li>Respect faculty availability constraints</li>
                       <li>Ensure no faculty conflicts</li>
                       <li>Assign appropriate rooms/labs</li>
                       <li>Schedule lab sessions in consecutive slots</li>
