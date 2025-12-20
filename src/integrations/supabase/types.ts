@@ -322,6 +322,135 @@ export type Database = {
           },
         ]
       }
+      substitutions: {
+        Row: {
+          created_at: string
+          created_by: string
+          date: string
+          id: string
+          original_faculty_id: string
+          reason: string | null
+          status: string
+          substitute_faculty_id: string | null
+          timetable_entry_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          date: string
+          id?: string
+          original_faculty_id: string
+          reason?: string | null
+          status?: string
+          substitute_faculty_id?: string | null
+          timetable_entry_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          date?: string
+          id?: string
+          original_faculty_id?: string
+          reason?: string | null
+          status?: string
+          substitute_faculty_id?: string | null
+          timetable_entry_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "substitutions_original_faculty_id_fkey"
+            columns: ["original_faculty_id"]
+            isOneToOne: false
+            referencedRelation: "faculty"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "substitutions_substitute_faculty_id_fkey"
+            columns: ["substitute_faculty_id"]
+            isOneToOne: false
+            referencedRelation: "faculty"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "substitutions_timetable_entry_id_fkey"
+            columns: ["timetable_entry_id"]
+            isOneToOne: false
+            referencedRelation: "timetable_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      swap_requests: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          id: string
+          reason: string | null
+          requester_entry_id: string
+          requester_faculty_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          target_entry_id: string
+          target_faculty_id: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          id?: string
+          reason?: string | null
+          requester_entry_id: string
+          requester_faculty_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          target_entry_id: string
+          target_faculty_id: string
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          id?: string
+          reason?: string | null
+          requester_entry_id?: string
+          requester_faculty_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          target_entry_id?: string
+          target_faculty_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "swap_requests_requester_entry_id_fkey"
+            columns: ["requester_entry_id"]
+            isOneToOne: false
+            referencedRelation: "timetable_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "swap_requests_requester_faculty_id_fkey"
+            columns: ["requester_faculty_id"]
+            isOneToOne: false
+            referencedRelation: "faculty"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "swap_requests_target_entry_id_fkey"
+            columns: ["target_entry_id"]
+            isOneToOne: false
+            referencedRelation: "timetable_entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "swap_requests_target_faculty_id_fkey"
+            columns: ["target_faculty_id"]
+            isOneToOne: false
+            referencedRelation: "faculty"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       time_slots: {
         Row: {
           break_name: string | null
@@ -437,6 +566,88 @@ export type Database = {
             columns: ["working_day_id"]
             isOneToOne: false
             referencedRelation: "working_days"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      timetable_templates: {
+        Row: {
+          created_at: string
+          created_by: string
+          department_id: string | null
+          description: string | null
+          id: string
+          is_public: boolean | null
+          name: string
+          template_data: Json
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          department_id?: string | null
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          name: string
+          template_data: Json
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          department_id?: string | null
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          name?: string
+          template_data?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timetable_templates_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      timetable_versions: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          name: string | null
+          snapshot: Json
+          timetable_id: string
+          version_number: number
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          name?: string | null
+          snapshot: Json
+          timetable_id: string
+          version_number: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          name?: string | null
+          snapshot?: Json
+          timetable_id?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timetable_versions_timetable_id_fkey"
+            columns: ["timetable_id"]
+            isOneToOne: false
+            referencedRelation: "timetables"
             referencedColumns: ["id"]
           },
         ]

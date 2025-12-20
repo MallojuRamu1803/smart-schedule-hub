@@ -38,6 +38,9 @@ const navItems: NavItem[] = [
   { icon: DoorOpen, label: 'Rooms', href: '/rooms', adminOnly: true },
   { icon: Clock, label: 'Time Slots', href: '/time-slots', adminOnly: true },
   { icon: Calendar, label: 'Timetables', href: '/timetables' },
+  { icon: LayoutDashboard, label: 'Analytics', href: '/analytics', adminOnly: true },
+  { icon: Users, label: 'Substitutions', href: '/substitutions', adminOnly: true },
+  { icon: CalendarDays, label: 'Swap Requests', href: '/swap-requests' },
   { icon: Settings, label: 'Settings', href: '/settings', adminOnly: true },
 ];
 
