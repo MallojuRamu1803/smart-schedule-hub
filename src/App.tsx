@@ -16,6 +16,9 @@ import Rooms from "./pages/Rooms";
 import TimeSlots from "./pages/TimeSlots";
 import Timetables from "./pages/Timetables";
 import Settings from "./pages/Settings";
+import Analytics from "./pages/Analytics";
+import Substitutions from "./pages/Substitutions";
+import SwapRequests from "./pages/SwapRequests";
 import NotFound from "./pages/NotFound";
 import { Loader2 } from "lucide-react";
 
@@ -57,6 +60,9 @@ const AppRoutes = () => {
       <Route path="/rooms" element={<ProtectedRoute adminOnly><Rooms /></ProtectedRoute>} />
       <Route path="/time-slots" element={<ProtectedRoute adminOnly><TimeSlots /></ProtectedRoute>} />
       <Route path="/timetables" element={<ProtectedRoute><Timetables /></ProtectedRoute>} />
+      <Route path="/analytics" element={<ProtectedRoute adminOnly><Analytics /></ProtectedRoute>} />
+      <Route path="/substitutions" element={<ProtectedRoute adminOnly><Substitutions /></ProtectedRoute>} />
+      <Route path="/swap-requests" element={<ProtectedRoute><SwapRequests /></ProtectedRoute>} />
       <Route path="/settings" element={<ProtectedRoute adminOnly><Settings /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>

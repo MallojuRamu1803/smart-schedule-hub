@@ -136,3 +136,61 @@ export interface Profile {
   faculty_id: string | null;
   created_at: string;
 }
+
+// New types for advanced features
+export interface Substitution {
+  id: string;
+  timetable_entry_id: string;
+  original_faculty_id: string;
+  substitute_faculty_id: string | null;
+  date: string;
+  reason: string | null;
+  status: 'pending' | 'assigned' | 'completed' | 'cancelled';
+  created_by: string;
+  created_at: string;
+  timetable_entry?: TimetableEntry;
+  original_faculty?: Faculty;
+  substitute_faculty?: Faculty;
+}
+
+export interface SwapRequest {
+  id: string;
+  requester_faculty_id: string;
+  target_faculty_id: string;
+  requester_entry_id: string;
+  target_entry_id: string;
+  reason: string | null;
+  status: 'pending' | 'approved' | 'rejected' | 'cancelled';
+  admin_notes: string | null;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  created_at: string;
+  requester_faculty?: Faculty;
+  target_faculty?: Faculty;
+  requester_entry?: TimetableEntry;
+  target_entry?: TimetableEntry;
+}
+
+export interface TimetableVersion {
+  id: string;
+  timetable_id: string;
+  version_number: number;
+  name: string | null;
+  description: string | null;
+  snapshot: any;
+  created_by: string;
+  created_at: string;
+  timetable?: Timetable;
+}
+
+export interface TimetableTemplate {
+  id: string;
+  name: string;
+  description: string | null;
+  template_data: any;
+  department_id: string | null;
+  is_public: boolean;
+  created_by: string;
+  created_at: string;
+  department?: Department;
+}
