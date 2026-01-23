@@ -31,7 +31,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Plus, Pencil, Trash2, Loader2, Calendar, Clock, GraduationCap } from 'lucide-react';
+import { Plus, Pencil, Trash2, Loader2, Clock, GraduationCap } from 'lucide-react';
 import type { AcademicYear, Section, Department, TimeSlot, WorkingDay } from '@/lib/types';
 
 const Settings = () => {
@@ -41,10 +41,6 @@ const Settings = () => {
   const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
   const [workingDays, setWorkingDays] = useState<WorkingDay[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // Academic Year Dialog
-  const [yearDialogOpen, setYearDialogOpen] = useState(false);
-  const [yearFormData, setYearFormData] = useState({ year: '', semester: 1 });
 
   // Section Dialog
   const [sectionDialogOpen, setSectionDialogOpen] = useState(false);
@@ -76,30 +72,6 @@ const Settings = () => {
   useEffect(() => {
     fetchData();
   }, []);
-
-  const handleCreateYear = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const { error } = await supabase.from('academic_years').insert(yearFormData);
-    if (error) {
-      if (error.message.includes('duplicate')) toast.error('This academic year already exists');
-      else toast.error('Failed to create academic year');
-    } else {
-      toast.success('Academic year created');
-      setYearDialogOpen(false);
-      setYearFormData({ year: '', semester: 1 });
-      fetchData();
-    }
-  };
-
-  const handleDeleteYear = async (id: string) => {
-    if (!confirm('Delete this academic year?')) return;
-    const { error } = await supabase.from('academic_years').delete().eq('id', id);
-    if (error) toast.error('Failed to delete');
-    else {
-      toast.success('Deleted');
-      fetchData();
-    }
-  };
 
   const handleCreateSection = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -149,109 +121,14 @@ const Settings = () => {
       <div className="space-y-6">
         <div>
           <h1 className="font-display text-2xl font-bold">Settings</h1>
-          <p className="text-muted-foreground">Configure academic years, sections, and schedule settings</p>
+          <p className="text-muted-foreground">Configure sections and schedule settings</p>
         </div>
 
-        <Tabs defaultValue="academic" className="space-y-6">
+        <Tabs defaultValue="sections" className="space-y-6">
           <TabsList>
-            <TabsTrigger value="academic">Academic Years</TabsTrigger>
             <TabsTrigger value="sections">Sections</TabsTrigger>
             <TabsTrigger value="schedule">Schedule</TabsTrigger>
           </TabsList>
-
-          <TabsContent value="academic" className="space-y-4">
-            <div className="flex items-center justify-between">
-              <h2 className="font-display text-lg font-semibold">Academic Years</h2>
-              <Dialog open={yearDialogOpen} onOpenChange={setYearDialogOpen}>
-                <DialogTrigger asChild>
-                  <Button variant="gradient">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Year
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Add Academic Year</DialogTitle>
-                    <DialogDescription>Create a new academic year</DialogDescription>
-                  </DialogHeader>
-                  <form onSubmit={handleCreateYear} className="space-y-4 mt-4">
-                    <div className="space-y-2">
-                      <Label>Year</Label>
-                      <Input
-                        placeholder="2024-25"
-                        value={yearFormData.year}
-                        onChange={(e) => setYearFormData({ ...yearFormData, year: e.target.value })}
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Semester</Label>
-                      <Select
-                        value={String(yearFormData.semester)}
-                        onValueChange={(v) => setYearFormData({ ...yearFormData, semester: parseInt(v) })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="1">Semester 1 (Odd)</SelectItem>
-                          <SelectItem value="2">Semester 2 (Even)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="flex justify-end gap-2 pt-4">
-                      <Button type="button" variant="outline" onClick={() => setYearDialogOpen(false)}>
-                        Cancel
-                      </Button>
-                      <Button type="submit" variant="gradient">Create</Button>
-                    </div>
-                  </form>
-                </DialogContent>
-              </Dialog>
-            </div>
-
-            <Card>
-              <CardContent className="p-0">
-                {academicYears.length === 0 ? (
-                  <div className="text-center py-12">
-                    <Calendar className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
-                    <p className="text-muted-foreground">No academic years configured</p>
-                  </div>
-                ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Year</TableHead>
-                        <TableHead>Semester</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead className="w-[100px]">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {academicYears.map((year) => (
-                        <TableRow key={year.id}>
-                          <TableCell className="font-medium">{year.year}</TableCell>
-                          <TableCell>Semester {year.semester}</TableCell>
-                          <TableCell>
-                            {year.is_active && (
-                              <span className="px-2 py-1 bg-lab/10 text-lab rounded text-xs font-medium">
-                                Active
-                              </span>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            <Button variant="ghost" size="icon" onClick={() => handleDeleteYear(year.id)} className="text-destructive hover:text-destructive">
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
 
           <TabsContent value="sections" className="space-y-4">
             <div className="flex items-center justify-between">
