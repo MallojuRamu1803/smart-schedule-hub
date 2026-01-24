@@ -1,0 +1,20 @@
+TIMETABLE FOR CSE-G
+Academic Year: 2025-2026
+--------------------------------------------------------------------------------
+| Day       | 09:00 - 10:00   | 10:00 - 11:00   | 11:00 - 11:10   | 11:10 - 12:10   | 12:10 - 01:10   | 01:10 - 01:55   | 01:55 - 02:55   | 02:55 - 03:55   |
+|-----------|-----------------|-----------------|-----------------|-----------------|-----------------|-----------------|-----------------|-----------------|
+| Monday    | Project Work (New Cellar) | ---             | BREAK           | Project Work (New Cellar) | Project Work (New Cellar) | LUNCH           | Project Work (New Cellar) | Project Work (New Cellar) |
+|           | (Mr. G. Venugopal Rao) |                 |                 | (Mr. G. Venugopal Rao) | (Mr. Guruvaiah) |                 | (Mr. Guruvaiah) | (Mr. Guruvaiah) |
+|-----------|-----------------|-----------------|-----------------|-----------------|-----------------|-----------------|-----------------|-----------------|
+| Tuesday   | OB (211 CB)     | DP (211 CB) & GAI (205 CM) | BREAK           | Project Work (112 CB) | ---             | LUNCH           | OE / Interaction (211 CB) | Minor / Sports (211 CB) |
+|           | (Mr. G. Kalyana Chakravarthy) | (Mrs. T. Radhika) & (Mrs. Sheshi Rekha) |                 | (Mr. G. Kalyana Chakravarthy) |                 |                 | (Mrs. Y. Sunitha) | (Mrs. T. Radhika) |
+|-----------|-----------------|-----------------|-----------------|-----------------|-----------------|-----------------|-----------------|-----------------|
+| Wednesday | Project Work (New Cellar) | ---             | BREAK           | Project Work (New Cellar) | Project Work (New Cellar) | LUNCH           | Project Work (New Cellar) | Project Work (New Cellar) |
+|           | (Mrs. T. Pavani) |                 |                 | (Mr. B. Sanjeev) | (Mr. B. Sanjeev) |                 | (Mrs. Y. Sunitha) | (Mrs. Y. Sunitha) |
+|-----------|-----------------|-----------------|-----------------|-----------------|-----------------|-----------------|-----------------|-----------------|
+| Friday    | OB (211 CB)     | DP (211 CB) & GAI (205 CM) | BREAK           | Project Work (New Cellar) | ---             | LUNCH           | Library (Central Library) | Minor / Interaction (211 CB) |
+|           | (Mr. G. Kalyana Chakravarthy) | (Mrs. T. Radhika) & (Mrs. Sheshi Rekha) |                 | (Mrs. Sheshi Rekha) |                 |                 | (Mr. G. Venugopal Rao) | (Mrs. T. Pavani) |
+|-----------|-----------------|-----------------|-----------------|-----------------|-----------------|-----------------|-----------------|-----------------|
+| Saturday  | OB (211 CB)     | DP (211 CB) & GAI (205 CM) | BREAK           | Project Work (New Cellar) | ---             | LUNCH           | Mentoring (211 CB) | Minor / Interaction (211 CB) |
+|           | (Mr. G. Kalyana Chakravarthy) | (Mrs. T. Radhika) & (Mrs. Sheshi Rekha) |                 | (Ms. V. Spandana) |                 |                 | (Mrs. T. Radhika) | (Mr. B. Sanjeev) |
+|-----------|-----------------|-----------------|-----------------|-----------------|-----------------|-----------------|-----------------|-----------------|

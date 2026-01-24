@@ -1,0 +1,20 @@
+TIMETABLE FOR CSE-G (SHUFFLED)
+Academic Year: 2025-2026
+--------------------------------------------------------------------------------
+| Day       | 09:00 - 10:00   | 10:00 - 11:00   | 11:10 - 12:10   | 12:10 - 01:10   | 01:55 - 02:55   | 02:55 - 03:55   |
+|-----------|-----------------|-----------------|-----------------|-----------------|-----------------|-----------------|
+| Monday    | OB              | Project Work    | OE / Interaction with Guide | DP & GAI        | Project Work    | Project Work    |
+|           | (Chakravarthy)  | (Rao)           | (Sunitha)       | (Radhika)&(Rekha) | (Guruvaiah)     | (Pavani)        |
+|-----------|-----------------|-----------------|-----------------|-----------------|-----------------|-----------------|
+| Tuesday   | DP & GAI        | OB              | Minor / Interaction | Project Work    | Mentoring       | Minor / Sports  |
+|           | (Radhika)&(Rekha) | (Chakravarthy)  | (Pavani)        | (Sanjeev)       | (Radhika)       | (Radhika)       |
+|-----------|-----------------|-----------------|-----------------|-----------------|-----------------|-----------------|
+| Wednesday | Project Work    | Project Work    | Project Work    | Project Work    | Project Work    | Project Work    |
+|           | (Rekha)         | (Spandana)      | (Sunitha)       | (Rao)           | (Guruvaiah)     | (Pavani)        |
+|-----------|-----------------|-----------------|-----------------|-----------------|-----------------|-----------------|
+| Friday    | OB              | Project Work    | Project Work    | Project Work    | Interaction with Guide | OE / Library    |
+|           | (Chakravarthy)  | (Sanjeev)       | (Rekha)         | (Spandana)      | (Sunitha)       | (Rao)           |
+|-----------|-----------------|-----------------|-----------------|-----------------|-----------------|-----------------|
+| Saturday  | Project Work    | Project Work    | DP & GAI        | Project Work    | Minor / Interaction | Project Work    |
+|           | (Sunitha)       | (Rao)           | (Radhika)&(Rekha) | (Guruvaiah)     | (Pavani)        | (Pavani)        |
+|-----------|-----------------|-----------------|-----------------|-----------------|-----------------|-----------------|
