@@ -238,7 +238,7 @@ const Timetables = () => {
 
           // Self-Healing: If no explicit mapping for Project Work, create it from allFaculty
           if (pwFacultyMappings.length === 0 && allFaculty.length > 0) {
-            const pwLeads = ['venugopal', 'guruvaiah', 'pavani', 'sanjeev', 'sheshi', 'spandana', 'sunitha'];
+            const pwLeads = ['venugopal', 'guruvaiah', 'pavani', 'sanjeev', 'sheshi', 'spandana', 'sunitha', 'krishna', 'lavanya', 'ratna', 'anusha', 'nagamani'];
             const matchedFaculty = allFaculty.filter(f => pwLeads.some(lead => f.name.toLowerCase().includes(lead)));
             // Create synthetic mappings
             pwFacultyMappings = matchedFaculty.map(f => ({
@@ -287,33 +287,70 @@ const Timetables = () => {
           for (const dp of allDayPairs) {
             if (pwHoursScheduled >= pwTarget) break;
 
-            // Try to schedule this pair
+            // Try to schedule this pair: Iterate through shuffled faculty until one is free
             const s1 = dp.pair[0];
             const s2 = dp.pair[1];
+            const room = pwRooms.length > 0 ? pwRooms[0] : rooms[0];
 
-            // Pick random faculty for this block from pool
-            if (pwFacultyMappings.length === 0) continue;
-            const facMap = pwFacultyMappings[Math.floor(Math.random() * pwFacultyMappings.length)];
-            const room = pwRooms.length > 0 ? pwRooms[0] : rooms[0]; // Logic simplified to pick first available room
+            // Shuffle faculty to distribute load
+            const shuffledFaculty = shuffle([...pwFacultyMappings]);
 
-            if (isSlotFree(dp.day.id, s1.id, facMap.faculty_id, room.id, section.id) &&
-              isSlotFree(dp.day.id, s2.id, facMap.faculty_id, room.id, section.id)) {
+            let scheduled = false;
+            for (const facMap of shuffledFaculty) {
+              if (isSlotFree(dp.day.id, s1.id, facMap.faculty_id, room.id, section.id) &&
+                isSlotFree(dp.day.id, s2.id, facMap.faculty_id, room.id, section.id)) {
 
-              // Schedule both
-              [s1, s2].forEach(slot => {
-                generatedEntries.push({
-                  timetable_id: newTimetable.id,
-                  section_id: section.id,
-                  subject_id: pwSubject.id,
-                  faculty_id: facMap.faculty_id,
-                  classroom_id: room.id,
-                  working_day_id: dp.day.id,
-                  time_slot_id: slot.id,
-                  is_locked: false
+                // Found a free faculty! Schedule it
+                [s1, s2].forEach(slot => {
+                  generatedEntries.push({
+                    timetable_id: newTimetable.id,
+                    section_id: section.id,
+                    subject_id: pwSubject.id,
+                    faculty_id: facMap.faculty_id,
+                    classroom_id: room.id,
+                    working_day_id: dp.day.id,
+                    time_slot_id: slot.id,
+                    is_locked: false
+                  });
+                  markSlotUsed(dp.day.id, slot.id, facMap.faculty_id, room.id, section.id);
                 });
-                markSlotUsed(dp.day.id, slot.id, facMap.faculty_id, room.id, section.id);
-              });
-              pwHoursScheduled += 2;
+                pwHoursScheduled += 2;
+                scheduled = true;
+
+                // Break faculty loop, move to next pair
+                break;
+              }
+            }
+
+            // FALLBACK: Force schedule if needed to reach target
+            if (!scheduled && pwHoursScheduled < pwTarget) {
+              const fallbackFac = pwFacultyMappings[0];
+              if (fallbackFac) {
+                // Check if slots are locally free for SECTION (ignore faculty/room busy-ness from other sections if desperate)
+                const key1 = `${dp.day.id}_${s1.id}`;
+                const key2 = `${dp.day.id}_${s2.id}`;
+                // We only care if the SECTION is free. Override faculty check.
+                const s1Free = !usedSlots.get(key1)?.has(`sec_${section.id}`);
+                const s2Free = !usedSlots.get(key2)?.has(`sec_${section.id}`);
+
+                if (s1Free && s2Free) {
+                  console.log('Forcing PW schedule to avoid empty slots');
+                  [s1, s2].forEach(slot => {
+                    generatedEntries.push({
+                      timetable_id: newTimetable.id,
+                      section_id: section.id,
+                      subject_id: pwSubject.id,
+                      faculty_id: fallbackFac.faculty_id,
+                      classroom_id: room.id,
+                      working_day_id: dp.day.id,
+                      time_slot_id: slot.id,
+                      is_locked: false
+                    });
+                    markSlotUsed(dp.day.id, slot.id, fallbackFac.faculty_id, room.id, section.id);
+                  });
+                  pwHoursScheduled += 2;
+                }
+              }
             }
           }
         }
@@ -327,15 +364,17 @@ const Timetables = () => {
         // Filter DP
         const dpSubject = otherSubjects.find(s => s.code.includes('DP'));
         const gaiSubject = otherSubjects.find(s => s.code.includes('GAI'));
+        const rpaSubject = otherSubjects.find(s => s.code.includes('RPA'));
 
         let parallelTasks = 0;
-        if (dpSubject && gaiSubject) {
+        // If we have at least these parallel subjects, we set parallel hours
+        if (dpSubject || gaiSubject || rpaSubject) {
           parallelTasks = 3; // 3 hours of parallel
         }
 
         const singleTasks: Subject[] = [];
         otherSubjects.forEach(s => {
-          if (s.code.includes('DP') || s.code.includes('GAI')) return; // Handled in parallel
+          if (s.code.includes('DP') || s.code.includes('GAI') || s.code.includes('RPA')) return; // Handled in parallel
           for (let i = 0; i < s.weekly_hours; i++) singleTasks.push(s);
         });
 
@@ -354,73 +393,83 @@ const Timetables = () => {
 
         shuffle(freeSlotsList);
 
-        // Schedule Parallel tasks (DP+GAI)
+        // Schedule Parallel tasks (DP+GAI+RPA)
         for (let i = 0; i < parallelTasks; i++) {
-          const slotIndex = freeSlotsList.findIndex(info => !isSubjectScheduledOnDay(info.day.id, [dpSubject!.id, gaiSubject!.id], section.id));
+          const subjectsToSchedule = [];
+          if (dpSubject) subjectsToSchedule.push(dpSubject);
+          if (gaiSubject) subjectsToSchedule.push(gaiSubject);
+          if (rpaSubject) subjectsToSchedule.push(rpaSubject);
+
+          if (subjectsToSchedule.length === 0) break;
+
+          let slotIndex = freeSlotsList.findIndex(info => !isSubjectScheduledOnDay(info.day.id, subjectsToSchedule.map(s => s.id), section.id));
+
+          // Strict constraint: Do not relax.
+          // if (slotIndex === -1 && freeSlotsList.length > 0) { ... } REMOVED
+
           if (slotIndex === -1) break;
 
           const slotInfo = freeSlotsList[slotIndex];
           freeSlotsList.splice(slotIndex, 1);
 
-          if (dpSubject && gaiSubject) {
-            // Mark both as scheduled
-            markSubjectScheduledOnDay(slotInfo.day.id, [dpSubject.id, gaiSubject.id], section.id);
+          // Mark scheduled on day
+          markSubjectScheduledOnDay(slotInfo.day.id, subjectsToSchedule.map(s => s.id), section.id);
 
+          // Theory Rooms Fallback
+          const theoryRooms = rooms.filter(r => !r.is_lab);
+
+          subjectsToSchedule.forEach((subj, idx) => {
             // Robust Faculty Fallback
-            let dpFac = facultySubjects.find(fs => fs.subject_id === dpSubject.id);
-            if (!dpFac) {
-              const f = allFaculty.find(f => f.name.toLowerCase().includes('radhika')) || allFaculty[0];
-              dpFac = { faculty_id: f?.id, subject_id: dpSubject.id, faculty: f } as any;
+            let facMap = facultySubjects.find(fs => fs.subject_id === subj.id);
+            if (!facMap) {
+              // Try to find by name logic or just random
+              const sc = subj.code.toLowerCase();
+              let kw = '';
+              if (sc.includes('dp')) kw = 'radhika';
+              else if (sc.includes('gai')) kw = 'sheshi';
+              else if (sc.includes('rpa')) kw = 'rpa'; // likely placeholder or new
+
+              let f = allFaculty[0]; // default
+              if (kw) {
+                f = allFaculty.find(fac => fac.name.toLowerCase().includes(kw)) || f;
+              }
+              facMap = { faculty_id: f.id, subject_id: subj.id, faculty: f } as any;
             }
 
-            let gaiFac = facultySubjects.find(fs => fs.subject_id === gaiSubject.id);
-            if (!gaiFac) {
-              const f = allFaculty.find(f => f.name.toLowerCase().includes('sheshi')) || allFaculty[1] || allFaculty[0];
-              gaiFac = { faculty_id: f?.id, subject_id: gaiSubject.id, faculty: f } as any;
-            }
+            // Pick room: 0->Theory1, 1->Theory2, 2->Theory3 (or fallback)
+            const room = theoryRooms[idx % theoryRooms.length] || rooms[0];
 
-            // Robust Room Fallback (Theory Rooms)
-            const theoryRooms = rooms.filter(r => !r.is_lab);
-            const r1 = theoryRooms[0] || rooms[0];
-            const r2 = theoryRooms.length > 1 ? theoryRooms[1] : (rooms[1] || rooms[0]);
-
-            // Add DP
             generatedEntries.push({
               timetable_id: newTimetable.id,
               section_id: section.id,
-              subject_id: dpSubject.id,
-              faculty_id: dpFac.faculty_id,
-              classroom_id: r1.id,
+              subject_id: subj.id,
+              faculty_id: facMap.faculty_id,
+              classroom_id: room.id,
               working_day_id: slotInfo.day.id,
               time_slot_id: slotInfo.slot.id,
               is_locked: false
             });
-            markSlotUsed(slotInfo.day.id, slotInfo.slot.id, dpFac.faculty_id, r1.id, section.id);
-
-            // Add GAI (Parallel)
-            generatedEntries.push({
-              timetable_id: newTimetable.id,
-              section_id: section.id,
-              subject_id: gaiSubject.id,
-              faculty_id: gaiFac.faculty_id,
-              classroom_id: r2.id,
-              working_day_id: slotInfo.day.id,
-              time_slot_id: slotInfo.slot.id,
-              is_locked: false
-            });
-            // Note: 'markSlotUsed' for GAI technically redundant for section check (already marked), but good for faculty/room check
-            // We skip logic for detailed conflict check here for brevity as per request "just shuffling"
-            markSlotUsed(slotInfo.day.id, slotInfo.slot.id, gaiFac.faculty_id, r2.id, section.id);
-          }
+            markSlotUsed(slotInfo.day.id, slotInfo.slot.id, facMap.faculty_id, room.id, section.id);
+          });
         }
 
         // Schedule Single tasks
+        // Sort tasks by hours descending so high-frequency subjects get first dibs on unique days
+        singleTasks.sort((a, b) => b.weekly_hours - a.weekly_hours);
+        // We still want randomness for tasks with SAME hours. Use a stable shuffle or block shuffle?
+        // Let's just shuffle the whole array first, THEN sort stable? No, sort destroys shuffle order.
+        // We can shuffle first, then sort.
         shuffle(singleTasks);
+        singleTasks.sort((a, b) => b.weekly_hours - a.weekly_hours);
+
         for (const task of singleTasks) {
-          const slotIndex = freeSlotsList.findIndex(info => !isSubjectScheduledOnDay(info.day.id, [task.id], section.id));
-          // If strict constraint fails, try ANY slot as fallback (optional, but requested strict)
+          let slotIndex = freeSlotsList.findIndex(info => !isSubjectScheduledOnDay(info.day.id, [task.id], section.id));
+
+          // Strict constraint: Do not relax.
+          // if (slotIndex === -1 && freeSlotsList.length > 0) { ... } REMOVED
+
           if (slotIndex === -1) {
-            console.log('Skipping task due to constraint:', task.name);
+            console.log('Skipping task - no slots left:', task.name);
             continue;
           }
 
