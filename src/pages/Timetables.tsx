@@ -230,10 +230,11 @@ const Timetables = () => {
       for (const section of activeSections) {
         const sectionSubjects: Subject[] = subjects.filter((s) => s.section_id === section.id);
 
-        // 1. PROJECT WORK (18 Hours -> 9 Pairs)
-        // Identify Project Work
-        const pwSubject = sectionSubjects.find(s => s.name.toLowerCase().includes('project work'));
-        if (pwSubject) {
+        // 1. PROJECT WORK & LABS
+        // Identify Project Work (Stage-II, Review, etc.)
+        const projectSubjects = sectionSubjects.filter(s => s.name.toLowerCase().includes('project'));
+
+        for (const pwSubject of projectSubjects) {
           let pwFacultyMappings = facultySubjects.filter(fs => fs.subject_id === pwSubject.id);
 
           // Self-Healing: If no explicit mapping for Project Work, create it from allFaculty
@@ -279,10 +280,28 @@ const Timetables = () => {
           });
 
           // Shuffle pairs and pick enough for 18 hours (9 pairs)
+          // Filter for Review to be on FRIDAY ONLY
+          if (pwSubject.name.toLowerCase().includes('review')) {
+            // Filter allDayPairs to only Friday
+            // Assuming Day 5 is Friday or name checking
+            const fridayPairs = allDayPairs.filter(dp => dp.day.day_name === 'Friday' || dp.day.id === '5'); // Adjust based on ID convention if needed
+            if (fridayPairs.length > 0) {
+              // Clear original and only use Friday
+              allDayPairs.length = 0;
+              fridayPairs.forEach(p => allDayPairs.push(p));
+            }
+          }
+
           shuffle(allDayPairs);
 
           let pwHoursScheduled = 0;
-          const pwTarget = 18; // Force 18 hours for PW based on request
+          let pwTarget = pwSubject.weekly_hours; // Use subject's distinct hours
+          if (pwTarget > 18) pwTarget = 18; // Cap at 18 if extreme
+          if (pwTarget === 0) pwTarget = 18; // Fallback if 0 in DB
+
+          // Heuristic: If hours < 4 (e.g. Review), don't force pairs?
+          // Actually pairs are safer for labs. 3 hours = 2 pairs (4 slots) usually or 1 pair + 1 single
+          // Let's stick to pairs for now. 3 hours -> 2 pairs (4 scheduled) is fine, or hardcode.
 
           for (const dp of allDayPairs) {
             if (pwHoursScheduled >= pwTarget) break;
@@ -357,7 +376,7 @@ const Timetables = () => {
 
         // 2. REMAINING SUBJECTS (Theory + DP/GAI)
         // Group remaining subjects
-        const otherSubjects = sectionSubjects.filter(s => !s.name.toLowerCase().includes('project work'));
+        const otherSubjects = sectionSubjects.filter(s => !s.name.toLowerCase().includes('project'));
 
         // Flatten into "Hours needed" tasks
         // Special case: DP & GAI (Parallel) -> Treated as 1 task that consumes 2 rooms/2 faculty but 1 slot
@@ -366,15 +385,24 @@ const Timetables = () => {
         const gaiSubject = otherSubjects.find(s => s.code.includes('GAI'));
         const rpaSubject = otherSubjects.find(s => s.code.includes('RPA'));
 
+        const pe4 = otherSubjects.find(s => s.code.includes('PE-IV'));
+        const pe5 = otherSubjects.find(s => s.code.includes('PE-V'));
+
         let parallelTasks = 0;
         // If we have at least these parallel subjects, we set parallel hours
+        // CSE Parallel
         if (dpSubject || gaiSubject || rpaSubject) {
           parallelTasks = 3; // 3 hours of parallel
+        }
+        // CSD Parallel
+        if (pe4 || pe5) {
+          parallelTasks = 3;
         }
 
         const singleTasks: Subject[] = [];
         otherSubjects.forEach(s => {
-          if (s.code.includes('DP') || s.code.includes('GAI') || s.code.includes('RPA')) return; // Handled in parallel
+          if (s.code.includes('DP') || s.code.includes('GAI') || s.code.includes('RPA')) return; // CSE Parallel
+          if (s.code.includes('PE-IV') || s.code.includes('PE-V')) return; // CSD Parallel
           for (let i = 0; i < s.weekly_hours; i++) singleTasks.push(s);
         });
 
@@ -399,6 +427,9 @@ const Timetables = () => {
           if (dpSubject) subjectsToSchedule.push(dpSubject);
           if (gaiSubject) subjectsToSchedule.push(gaiSubject);
           if (rpaSubject) subjectsToSchedule.push(rpaSubject);
+
+          if (pe4) subjectsToSchedule.push(pe4);
+          if (pe5) subjectsToSchedule.push(pe5);
 
           if (subjectsToSchedule.length === 0) break;
 
